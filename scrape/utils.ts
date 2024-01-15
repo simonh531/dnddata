@@ -1,5 +1,6 @@
 import { JSONToHTML, JSONType } from "html-to-json-parser";
 import { NodeHtmlMarkdown } from "node-html-markdown";
+import { Talent, RequireIds } from "./types";
 
 const nhm = new NodeHtmlMarkdown(
   /* options (optional) */ {},
@@ -11,14 +12,6 @@ export interface DataHolder {
   name: string;
   category?: string;
   content: (JSONType | string)[];
-}
-
-export interface Talent {
-  id: string;
-  name?: string;
-  featureIds?: string[];
-  modifierIds?: string[];
-  categoryId?: string;
 }
 
 export interface Feature {
@@ -41,8 +34,7 @@ export interface Modifier {
   modifyId: string;
 }
 
-export const sphere = {
-  freeCategoryIds: [],
+export const sphereDefault = {
   featureIds: [],
   actionIds: [],
   bonusActionIds: [],
@@ -293,8 +285,12 @@ export async function scrapeTalentList(
   name: string,
   receiver: Record<string, Feature | Modifier>,
   talents: Record<string, Talent>,
-  modifyId?: string,
-  type?: string
+  options?: {
+    modifyId?: string,
+    type?: string,
+    requireIds?: RequireIds
+    text?: string
+  }
 ) {
   const list: DataHolder[] = [];
   const titleIndex = getTitleIndex(content, contentTitle);
@@ -330,18 +326,21 @@ export async function scrapeTalentList(
         const newTalent: Talent = {
           id: toID(listItem.name),
           name: listItem.name.toLowerCase(),
-          categoryId: toID(name),
+          tags: [],
         };
-        if (modifyId) {
+        if (options?.modifyId) {
           newTalent.modifierIds = [toID(listItem.name)];
         } else {
           newTalent.featureIds = [toID(listItem.name)];
         }
+        if (options?.requireIds) {
+          newTalent.requireIds = options.requireIds
+        }
         talents[newTalent.id] = newTalent;
-        if (modifyId && type) {
+        if (options?.modifyId && options?.type) {
           const newModifier: Modifier = {
             id: toID(listItem.name),
-            type,
+            type: options.type,
             name: listItem.name.toLowerCase(),
             text: await nhm.translate(
               (await JSONToHTML({
@@ -349,7 +348,7 @@ export async function scrapeTalentList(
                 content: listItem.content,
               })) as string
             ),
-            modifyId,
+            modifyId: options.modifyId,
           };
           receiver[newModifier.id] = newModifier;
         } else {
@@ -375,4 +374,14 @@ export function featureArrayToObject(features: Feature[]) {
   const featureObject: Record<string, Feature> = {};
   features.forEach((feature) => (featureObject[feature.id] = feature));
   return featureObject;
+}
+
+export function AddInitialTalent(talents: Record<string, Talent>, name: string, options: Partial<Talent>) {
+  const id = toID(name)
+  talents[id] = {
+    id,
+    name,
+    tags: [],
+    ...options
+  };
 }
