@@ -12,16 +12,16 @@ import warleader from "./warleader.json";
 
 const spheres = {
   ALTERATION: alteration,
-  CONJURATION: conjuration,
-  CREATION: creation,
-  DARK: dark,
-  DESTRUCTION: destruction,
-  ENHANCEMENT: enhancement,
-  FATE: fate,
-  ILLUSION: illusion,
+  // CONJURATION: conjuration,
+  // CREATION: creation,
+  // DARK: dark,
+  // DESTRUCTION: destruction,
+  // ENHANCEMENT: enhancement,
+  // FATE: fate,
+  // ILLUSION: illusion,
 
-  EQUIPMENT: equipment,
-  WARLEADER: warleader,
+  // EQUIPMENT: equipment,
+  // WARLEADER: warleader,
 };
 
 export default spheres;
